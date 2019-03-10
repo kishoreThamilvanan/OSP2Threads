@@ -1,5 +1,14 @@
+/**
+ * Name 	: Kishore Thamilvanan
+ * SBU ID 	: 111373510
+ * 
+ * I pledge my honor that all parts of this project were done by me individually, 
+ *	 	without collaboration with anyone, and without consulting any external sources 
+ *			that could help with similar projects.
+ */
 package osp.Threads;
 import java.util.Vector;
+import java.util.*;
 import java.util.Enumeration;
 import osp.Utilities.*;
 import osp.IFLModules.*;
@@ -41,7 +50,7 @@ public class ThreadCB extends IflThreadCB
     public static void init()
     {
     	// A list of threads to be here.
-    	threads = new ThreadCB[];
+    	PriorityQueue<ThreadCB> ready_queue = new PriorityQueue<ThreadCB>();
     }
 
     /** 
@@ -68,7 +77,9 @@ public class ThreadCB extends IflThreadCB
     		return null;
     	}
     	
-    	new_thread = ThreadCB();
+    	new_thread = new ThreadCB;
+    	new_thread.ThreadCB();
+    	
     	if(task.addThread(new_thread) == FAILURE){
     		dispatch();
     		return null;
@@ -79,11 +90,11 @@ public class ThreadCB extends IflThreadCB
     	new_thread.setStatus(ThreadReady);
     		
     	// must be placed in a ready queue
-    	// what to do ??????
+    	ready_queue.add(new_thread);
     	
     	
     	dispatch();
-    	
+    	return new_thread;
     	
     	
     }
@@ -103,7 +114,31 @@ public class ThreadCB extends IflThreadCB
     */
     public void do_kill()
     {
-
+    	this.setStatus(ThreadKill);
+    	
+    	if(this.getStatus() ==  ThreadReady){
+    		ready_queue.remove(this);
+    	}
+    	
+    	if(this.getStatus() == ThreadRunning){
+    		getPTBR().getTask().setCurrentThread(null);
+    		setPTBR(null);
+    		dispatch();
+    	}
+ 
+    	int i = Device.getTableSize()-1;
+    	while(i>-1){
+    		
+    		random_device = Device.get(i);
+    		random_device.cancelPendingIO();
+ 
+    		i--;
+    	}
+    	
+    	giveupResources(this);
+ 
+    	
+    	
     }
 
     /** 
