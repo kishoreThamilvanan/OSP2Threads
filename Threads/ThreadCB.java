@@ -123,7 +123,6 @@ public class ThreadCB extends IflThreadCB
     	if(this.getStatus() == ThreadRunning){
     		getPTBR().getTask().setCurrentThread(null);
     		setPTBR(null);
-    		dispatch();
     	}
  
     	int i = Device.getTableSize()-1;
@@ -136,13 +135,17 @@ public class ThreadCB extends IflThreadCB
     	}
     	
     	giveupResources(this);
- 
     	
+    	dispatch();
     	
+    	if(this.getTask().getThreadCount() == 0)
+    		this.getTask().kill();
+    	
+    	return;
     }
 
     /** 
-		Suspends the thread that is currenly on the processor on the 
+		Suspends the thread that is currently on the processor on the 
 		specified event. 
 		
 		Note that the thread being suspended doesn't need to be
@@ -160,7 +163,18 @@ public class ThreadCB extends IflThreadCB
     */
     public void do_suspend(Event event)
     {
+    	
+    	if(this.getStatus() == ThreadRunning)
+    		this.setStatus(ThreadWaiting);
 
+    	else if(this.getStatus() == ThreadWaiting)
+    		this.setStatus(ThreadWaiting + 1);
+    	
+    	event.addThread(this);
+    	suspend(this);
+    	
+    	dispatch();
+    	
     }
 
     /** Resumes the thread.
@@ -172,8 +186,24 @@ public class ThreadCB extends IflThreadCB
 		
 		@OSPProject Threads
     */
-    public void do_resume()
-    {
+    public void do_resume(){
+    	
+    	if(this.getStatus()< ThreadWaiting){
+    		
+    		dispatch();
+    		return;
+    	}
+    	
+    	if(this.getStatus() > ThreadWaiting)
+    		this.setStatus(this.getStatus()--);
+    	else {
+    	
+    		this.setStatus(ThreadReady);
+    		ready_queue.add(this);
+    	}
+
+		dipatch();
+
     }
 
     /** 
@@ -191,7 +221,23 @@ public class ThreadCB extends IflThreadCB
     */
     public static int do_dispatch()
     {
+        if(ready_queue.size == 0)
+        	return FAILURE;
         
+        int i = ready_queue.size()-1;
+        int higher_priority = read_queue.get(i);
+        
+        while(i<-1){
+        	
+        	if(ready_queue.get(i).getPriority() > higher_priority)
+        		higher_priority = ready_queue.get(i).getPriority();
+        	
+        	
+        	i--;
+        }
+        
+        
+        return SUCCESS;
     }
 
     /**
