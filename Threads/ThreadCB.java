@@ -41,7 +41,7 @@ public class ThreadCB extends IflThreadCB
     public static void init()
     {
     	// A list of threads to be here.
-    	Active_threads = new ThreadCB[];
+    	threads = new ThreadCB[];
     }
 
     /** 
@@ -62,7 +62,30 @@ public class ThreadCB extends IflThreadCB
     */
     static public ThreadCB do_create(TaskCB task)
     {
-    	New_thread = ThreadCB();
+    	
+    	if(task.getThreadCount() > MaxThreadsPerTask){
+    		dispatch();
+    		return null;
+    	}
+    	
+    	new_thread = ThreadCB();
+    	if(task.addThread(new_thread) == FAILURE){
+    		dispatch();
+    		return null;
+    	}
+    	
+    	new_thread.setTask(task);
+    	new_thread.setPriority(task.getPriority());
+    	new_thread.setStatus(ThreadReady);
+    		
+    	// must be placed in a ready queue
+    	// what to do ??????
+    	
+    	
+    	dispatch();
+    	
+    	
+    	
     }
 
     /** 
