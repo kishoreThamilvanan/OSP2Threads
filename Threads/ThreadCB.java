@@ -29,8 +29,7 @@ public class ThreadCB extends IflThreadCB
     */
     public ThreadCB()
     {
-        // your code goes here
-
+        super();
     }
 
     /**
@@ -41,87 +40,82 @@ public class ThreadCB extends IflThreadCB
     */
     public static void init()
     {
-        // your code goes here
-
+    	// A list of threads to be here.
+    	Active_threads = new ThreadCB[];
     }
 
     /** 
-        Sets up a new thread and adds it to the given task. 
-        The method must set the ready status 
-        and attempt to add thread to task. If the latter fails 
-        because there are already too many threads in this task, 
-        so does this method, otherwise, the thread is appended 
-        to the ready queue and dispatch() is called.
-
-	The priority of the thread can be set using the getPriority/setPriority
-	methods. However, OSP itself doesn't care what the actual value of
-	the priority is. These methods are just provided in case priority
-	scheduling is required.
-
-	@return thread or null
-
+	    Sets up a new thread and adds it to the given task. 
+	    The method must set the ready status 
+	    and attempt to add thread to task. If the latter fails 
+	    because there are already too many threads in this task, 
+	    so does this method, otherwise, the thread is appended 
+	    to the ready queue and dispatch() is called.
+	
+		The priority of the thread can be set using the getPriority/setPriority
+		methods. However, OSP itself doesn't care what the actual value of
+		the priority is. These methods are just provided in case priority
+		scheduling is required.
+	
+		@return thread or null
         @OSPProject Threads
     */
     static public ThreadCB do_create(TaskCB task)
     {
-        // your code goes here
+    	New_thread = ThreadCB();
+    }
+
+    /** 
+		Kills the specified thread. 
+	
+		The status must be set to ThreadKill, the thread must be
+		removed from the task's list of threads and its pending IORBs
+		must be purged from all device queues.
+	        
+		If some thread was on the ready queue, it must removed, if the 
+		thread was running, the processor becomes idle, and dispatch() 
+		must be called to resume a waiting thread.
+		
+		@OSPProject Threads
+    */
+    public void do_kill()
+    {
 
     }
 
     /** 
-	Kills the specified thread. 
-
-	The status must be set to ThreadKill, the thread must be
-	removed from the task's list of threads and its pending IORBs
-	must be purged from all device queues.
-        
-	If some thread was on the ready queue, it must removed, if the 
-	thread was running, the processor becomes idle, and dispatch() 
-	must be called to resume a waiting thread.
-	
-	@OSPProject Threads
-    */
-    public void do_kill()
-    {
-        // your code goes here
-
-    }
-
-    /** Suspends the thread that is currenly on the processor on the 
-        specified event. 
-
-        Note that the thread being suspended doesn't need to be
-        running. It can also be waiting for completion of a pagefault
-        and be suspended on the IORB that is bringing the page in.
-	
-	Thread's status must be changed to ThreadWaiting or higher,
-        the processor set to idle, the thread must be in the right
-        waiting queue, and dispatch() must be called to give CPU
-        control to some other thread.
-
-	@param event - event on which to suspend this thread.
-
-        @OSPProject Threads
+		Suspends the thread that is currenly on the processor on the 
+		specified event. 
+		
+		Note that the thread being suspended doesn't need to be
+		running. It can also be waiting for completion of a pagefault
+		and be suspended on the IORB that is bringing the page in.
+		
+		Thread's status must be changed to ThreadWaiting or higher,
+		the processor set to idle, the thread must be in the right
+		waiting queue, and dispatch() must be called to give CPU
+		control to some other thread.
+		
+		@param event - event on which to suspend this thread.
+		
+		@OSPProject Threads
     */
     public void do_suspend(Event event)
     {
-        // your code goes here
 
     }
 
     /** Resumes the thread.
         
-	Only a thread with the status ThreadWaiting or higher
-	can be resumed.  The status must be set to ThreadReady or
-	decremented, respectively.
-	A ready thread should be placed on the ready queue.
-	
-	@OSPProject Threads
+		Only a thread with the status ThreadWaiting or higher
+		can be resumed.  The status must be set to ThreadReady or
+		decremented, respectively.
+		A ready thread should be placed on the ready queue.
+		
+		@OSPProject Threads
     */
     public void do_resume()
     {
-        // your code goes here
-
     }
 
     /** 
@@ -133,14 +127,13 @@ public class ThreadCB extends IflThreadCB
         In addition to setting the correct thread status it must
         update the PTBR.
 	
-	@return SUCCESS or FAILURE
+		@return SUCCESS or FAILURE
 
         @OSPProject Threads
     */
     public static int do_dispatch()
     {
-        // your code goes here
-
+        
     }
 
     /**
@@ -153,7 +146,6 @@ public class ThreadCB extends IflThreadCB
     */
     public static void atError()
     {
-        // your code goes here
 
     }
 
@@ -166,8 +158,7 @@ public class ThreadCB extends IflThreadCB
      */
     public static void atWarning()
     {
-        // your code goes here
-
+        
     }
 
 
