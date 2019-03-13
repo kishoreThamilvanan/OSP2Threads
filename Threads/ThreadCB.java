@@ -6,6 +6,7 @@
  *	 	without collaboration with anyone, and without consulting any external sources 
  *			that could help with similar projects.
  */
+
 package osp.Threads;
 import java.util.Vector;
 import java.util.*;
@@ -27,6 +28,10 @@ import osp.Resources.*;
 */
 public class ThreadCB extends IflThreadCB 
 {
+	
+	
+	PriorityQueue<ThreadCB> ready_queue;
+	
     /**
        The thread constructor. Must call 
 
@@ -38,6 +43,7 @@ public class ThreadCB extends IflThreadCB
     */
     public ThreadCB()
     {
+//    	out("I am in constructor");
         super();
     }
 
@@ -47,10 +53,16 @@ public class ThreadCB extends IflThreadCB
        
        @OSPProject Threads
     */
-    public static void init()
-    {
-    	// A list of threads to be here.
-    	PriorityQueue<ThreadCB> ready_queue = new PriorityQueue<ThreadCB>();
+    public static void init(){
+    	
+    	    	/*PriorityQueue<ThreadCB>*/ ready_queue = new PriorityQueue<ThreadCB>();
+    	    	
+//    	    	*******************
+
+    	    	out("Init()");
+    	    	qstatus();
+    	    	
+//    	    	*******************
     }
 
     /** 
@@ -72,30 +84,34 @@ public class ThreadCB extends IflThreadCB
     static public ThreadCB do_create(TaskCB task)
     {
     	
-    	if(task.getThreadCount() > MaxThreadsPerTask){
+    	if(task == null || task.getThreadCount() >= MaxThreadsPerTask){
     		dispatch();
     		return null;
     	}
     	
-    	new_thread = new ThreadCB;
-    	new_thread.ThreadCB();
+    	ThreadCB new_thread = new ThreadCB();
+    	
+    	new_thread.setTask(task);
+    	new_thread.setPriority(task.getPriority());
+    	new_thread.setStatus(ThreadReady);
     	
     	if(task.addThread(new_thread) == FAILURE){
     		dispatch();
     		return null;
     	}
     	
-    	new_thread.setTask(task);
-    	new_thread.setPriority(task.getPriority());
-    	new_thread.setStatus(ThreadReady);
-    		
-    	// must be placed in a ready queue
-    	ready_queue.add(new_thread);
+    	else	// placing it in the queue.
+    		ready_queue.add(new_thread);
     	
     	
     	dispatch();
-    	return new_thread;
+//    	*******************
+
+    	out("Do_create()");
+    	qstatus();
     	
+//    	*******************
+    	return new_thread;
     	
     }
 
@@ -140,8 +156,16 @@ public class ThreadCB extends IflThreadCB
     	
     	if(this.getTask().getThreadCount() == 0)
     		this.getTask().kill();
+    
+//    	*******************
+
+    	out("Do_kill()");
+    	qstatus();
+    	
+//    	*******************
     	
     	return;
+    
     }
 
     /** 
@@ -188,6 +212,8 @@ public class ThreadCB extends IflThreadCB
     */
     public void do_resume(){
     	
+    	this.status();
+    	
     	if(this.getStatus()< ThreadWaiting){
     		
     		dispatch();
@@ -221,25 +247,63 @@ public class ThreadCB extends IflThreadCB
     */
     public static int do_dispatch()
     {
+    	out("In dispatch method");
+    	
         if(ready_queue.size == 0)
         	return FAILURE;
         
         int i = ready_queue.size()-1;
         int higher_priority = read_queue.get(i);
         
-        while(i<-1){
-        	
-        	if(ready_queue.get(i).getPriority() > higher_priority)
-        		higher_priority = ready_queue.get(i).getPriority();
-        	
-        	
-        	i--;
-        }
-        
+//        while(i<-1){
+//        	
+//        	if(ready_queue.get(i).getPriority() > higher_priority)
+//        		higher_priority = ready_queue.get(i).getPriority();
+//        	
+////        	Thread Waiting_time = thread.getCreationTime - thread.TimeonCPU. 
+//        
+//        	i--;
+//        }
+//        
         
         return SUCCESS;
     }
 
+    /**
+     * Function to basically print messages easily
+     * 
+     * @param s
+     */
+    public static void out(String s){
+    	System.out.print(s);
+    }
+    
+    /**
+     * Prints the essential details of the Thread.
+     * 
+     */
+    public void status(){
+    	
+    	out("\nThread   :\t"+this.getID());
+    	out("\nStatus   :\t"+this.getStatus());
+    	out("\nPriority :\t"+this.getPriority());
+    	out("\nTask     :\t"+this.getTask());
+    	
+    }
+    
+    /**
+     *  Prints all the threads of the queues.
+     */
+    public static void qstatus(){
+    	
+    	int i=0
+    	while(i < ready_queue.size()){
+    		ready_queue.get(i).status();
+    	}
+    }
+    
+    
+    
     /**
        Called by OSP after printing an error message. The student can
        insert code here to print various tables and data structures in
