@@ -1,3 +1,9 @@
+package osp.Threads;
+
+import osp.IFLModules.*;
+import osp.Utilities.*;
+import osp.Hardware.*;
+
 /**
  * Name 	: Kishore Thamilvanan
  * SBU ID 	: 111373510
@@ -7,11 +13,6 @@
  *			that could help with similar projects.
  */
 
-package osp.Threads;
-
-import osp.IFLModules.*;
-import osp.Utilities.*;
-import osp.Hardware.*;
 
 /**    
        The timer interrupt handler.  This class is called upon to
@@ -29,8 +30,8 @@ public class TimerInterruptHandler extends IflTimerInterruptHandler
     */
     public void do_handleInterrupt()
     {
-        // your code goes here
-
+    		System.out.print("\n\t\t**** Interrupt Handler in action, Dispatching thread ****\n");
+    		dispatch();
     }
 
 
