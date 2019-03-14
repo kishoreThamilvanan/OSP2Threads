@@ -31,7 +31,7 @@ public class TimerInterruptHandler extends IflTimerInterruptHandler
     public void do_handleInterrupt()
     {
     		System.out.print("\n\t\t**** Interrupt Handler in action, Dispatching thread ****\n");
-    		dispatch();
+    		ThreadCB.dispatch();
     }
 
 

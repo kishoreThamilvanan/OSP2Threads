@@ -30,7 +30,7 @@ import osp.Resources.*;
  */
 public class ThreadCB extends IflThreadCB {
 
-	PriorityQueue<ThreadCB> ready_queue;
+	static ArrayList<ThreadCB> ready_queue;
 
 	/**
 	 * The thread constructor. Must call
@@ -54,14 +54,8 @@ public class ThreadCB extends IflThreadCB {
 	 */
 	public static void init() {
 
-		/* PriorityQueue<ThreadCB> */ ready_queue = new PriorityQueue<ThreadCB>();
+		/* PriorityQueue<ThreadCB> */ ready_queue = new ArrayList<ThreadCB>();
 
-		// *******************
-
-		out("Init()");
-		qstatus();
-
-		// *******************
 	}
 
 	/**
@@ -103,7 +97,7 @@ public class ThreadCB extends IflThreadCB {
 		dispatch();
 		// *******************
 
-		out("Do_create()");
+		MyOut.print(new_thread, "Do_create()");
 		qstatus();
 
 		// *******************
@@ -130,9 +124,11 @@ public class ThreadCB extends IflThreadCB {
 			ready_queue.remove(this);
 		}
 
+//		if(getPTBR().getTask().getCurrentThread() == this)
+			
 		if (this.getStatus() == ThreadRunning) {
-			getPTBR().getTask().setCurrentThread(null);
-			setPTBR(null);
+			MMU.getPTBR().getTask().setCurrentThread(null);
+			MMU.setPTBR(null);
 		}
 
 		this.setStatus(ThreadKill);
@@ -140,13 +136,11 @@ public class ThreadCB extends IflThreadCB {
 		int i = Device.getTableSize() - 1;
 		while (i > -1) {
 
-			random_device = Device.get(i);
-			random_device.cancelPendingIO();
-
+			Device.get(i).cancelPendingIO(this);
 			i--;
 		}
 		
-		giveupResources(this);
+		ResourceCB.giveupResources(this);
 
 		dispatch();
 
@@ -155,7 +149,7 @@ public class ThreadCB extends IflThreadCB {
 
 		// *******************
 
-		out("Do_kill()");
+		this.out("Do_kill()");
 		qstatus();
 
 		// *******************
@@ -187,15 +181,13 @@ public class ThreadCB extends IflThreadCB {
 			this.setStatus(ThreadWaiting);
 			
 			// we have to suspend the IORB of the thread. 
-			setPTBR(null);
-			getTask().setCurrentThread(null);
+			MMU.setPTBR(null);
+			this.getTask().setCurrentThread(null);
 			event.addThread(this);
 		}
 
 		else if (this.getStatus() >= ThreadWaiting)
 			this.setStatus(ThreadWaiting + 1);
-
-//		suspend(this);
 
 		dispatch();
 
@@ -221,7 +213,7 @@ public class ThreadCB extends IflThreadCB {
 		}
 
 		if (this.getStatus() > ThreadWaiting)
-			this.setStatus(this.getStatus()--);
+			this.setStatus(this.getStatus()-1);
 		
 		else {
 
@@ -229,7 +221,7 @@ public class ThreadCB extends IflThreadCB {
 			ready_queue.add(this);
 		}
 
-		dipatch();
+		dispatch();
 
 	}
 
@@ -246,23 +238,33 @@ public class ThreadCB extends IflThreadCB {
 	 * @OSPProject Threads
 	 */
 	public static int do_dispatch() {
-		out("In dispatch method");
+		System.out.print("In dispatch method");
 
 		ThreadCB th =  new ThreadCB();
-		if(ready_queue.size() <= 0)
-			return FAILURE;
 		
-		else 
-			th = ready_queue.remove(0);
+		// to get the currently running thread.
+		ThreadCB current_thread = MMU.getPTBR().getTask().getCurrentThread();
 		
+		//suspend the currently running thread.
+		if(current_thread != null){
+			MMU.setPTBR(null);
+			current_thread.getTask().setCurrentThread(null);
+			
+			//adding the current thread to the ready queue.
+			current_thread.setStatus(ThreadReady);
+			ready_queue.add(current_thread);
+		}
 		
-		// implementation still pending.
-		
-		
+		// now to dispatch a new thread from thr ready queue.
+		if(ready_queue.size() > 0){
+			th = ready_queue.remove(0);	
+		}
+				
 		
 		// Thread Waiting_time = thread.getCreationTime - thread.TimeonCPU.
-		
-		return SUCCESS;
+		MMU.setPTBR(null);
+		current_thread.getTask().setCurrentThread(null);
+		return FAILURE;
 	}
 
 	/**
@@ -270,8 +272,8 @@ public class ThreadCB extends IflThreadCB {
 	 * 
 	 * @param s
 	 */
-	public static void out(String s) {
-		System.out.print(s);
+	public void out(String s) {
+		MyOut.print(this, s);
 	}
 
 	/**
@@ -280,17 +282,17 @@ public class ThreadCB extends IflThreadCB {
 	 */
 	public void status() {
 
-		out("\n\nThread   :\t"); 
-			out(this.getID());
+		this.out("\n\nThread   :\t"); 
+			this.out(""+this.getID());
 		
-		out("\nStatus   :\t"); 
-			out(this.getStatus());
+		this.out("\nStatus   :\t"); 
+			this.out(""+this.getStatus());
 		
-		out("\nPriority :\t"); 
-			out(this.getPriority());
+		this.out("\nPriority :\t"); 
+			this.out(""+this.getPriority());
 		
-		out("\nTask     :\t"); 
-			out(this.getTask());
+		this.out("\nTask     :\t"); 
+			this.out(""+this.getTask());
 
 	}
 
@@ -299,9 +301,9 @@ public class ThreadCB extends IflThreadCB {
      */
     public static void qstatus(){
     	
-    	int i=0
+    	int i=0;
     	while(i < ready_queue.size()){
-    		ready_queue.get(i).status();
+    		(ready_queue.get(i)).getStatus();
     	}
     }
 
