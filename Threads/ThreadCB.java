@@ -303,8 +303,8 @@ public class ThreadCB extends IflThreadCB {
     	
     	int i=0;
     	while(i < ready_queue.size()){
-    		(ready_queue.get(i)).getStatus();
-    	}
+    		(ready_queue.get(i)).getStatus();	
+       	}
     }
 
 	/**
